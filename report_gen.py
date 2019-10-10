@@ -248,7 +248,7 @@ def result_to_kWh(result, value):
     for item in kWh:
         return item[value]
 
-def main(host='192.168.1.6', port=8086, year='2019', month='08'):
+def main(host, port, year, month, tariff):
     now = datetime.datetime.today()
 
     client = InfluxDBClient(host, port, USER, PASSWORD, DBNAME)
@@ -268,7 +268,7 @@ def main(host='192.168.1.6', port=8086, year='2019', month='08'):
         #print(s_query)
         result = client.query(s_query, database=DBNAME)
         kWh = result_to_kWh(result,'last_first')
-        print("7729-%05d, %d/1/%s, %d/%d/%s, EL, %s" % (int(id),int(month),year,int(month),int(last_day[-2:]),year,kWh))
+        print("7729-%05d, %d/1/%s, %d/%d/%s, EL, %.2f, %s kWh" % (int(id),int(month),year,int(month),int(last_day[-2:]),year,tariff*float(kWh),kWh))
 
 
 
@@ -284,12 +284,13 @@ def parse_args():
     parser.add_argument('--year', type=str, required=False,
                         default='2019',
                         help='year of the queried period')
-    parser.add_argument('--month', type=str, required=False,
-                        default='08',
+    parser.add_argument('--month', type=str, required=False, default='08',
                         help='month of the queried period')
+    parser.add_argument('--tariff', type=float, required=False, default=1.48,
+                        help='tariff to use')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     args = parse_args()
-    main(host=args.host, port=args.port, year=args.year, month=args.month)
+    main(host=args.host, port=args.port, year=args.year, month=args.month, tariff=args.tariff)
