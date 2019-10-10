@@ -258,16 +258,17 @@ def main(host='192.168.1.6', port=8086, year='2019', month='08'):
 
     result = client.query(query, database=DBNAME)
     #print("Result: {0}".format(result))
+    last_day = str(last_day_of_month(datetime.date(int(year), int(month), 1)))
 
-    last_day = "%s%s" % (last_day_of_month(datetime.date(int(year), int(month), 1)), 'T23:59:00Z')
-    #print last_day
+    last_day_string = "%s%s" % (last_day, 'T23:59:00Z')
+    print("Hyresid, Datum fr.o.m, Datum t.o.m, Artikel 1, Belopp, Avitext")
 
-    for i in id_list:
-        s_query = "SELECT last(\"kWh\")-first(\"kWh\") FROM \"Energy\" WHERE (id = %d) AND time >= '%s-%s-01' AND time <= '%s'" % (i, year, month, last_day)
+    for id in id_list:
+        s_query = "SELECT last(\"kWh\")-first(\"kWh\") FROM \"Energy\" WHERE (id = %d) AND time >= '%s-%s-01' AND time <= '%s'" % (id, year, month, last_day_string)
         #print(s_query)
         result = client.query(s_query, database=DBNAME)
         kWh = result_to_kWh(result,'last_first')
-        print("%s%s, 7729-%s, %s" % (year,month,i,kWh))
+        print("7729-%05d, %d/1/%s, %d/%d/%s, EL, %s" % (int(id),int(month),year,int(month),int(last_day[-2:]),year,kWh))
 
 
 
