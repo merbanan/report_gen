@@ -276,17 +276,17 @@ def main(host, port, year, month, tariff):
     brf_sheet.write('F1', 'Avitext')
     format_text = brf_book.add_format()
     format_text.set_num_format('@') # @ - This is text format in excel
-    format_date = brf_book.add_format({'num_format': 'm/d/yyyy'})
+    format_date = brf_book.add_format({'num_format': 'yyyy-mm-dd'})
 
     billing_year = int(year)
     billing_month = int(month)+4
     if billing_month > 12:
         billing_month = billing_month%12
         billing_year = billing_year+1
-    billing_date_str_from = '%d/1/%d' % (billing_month,billing_year)
-    billing_date_str_tom = '%d/%d/%d' % (billing_month,calendar.monthrange(int(billing_year),int(billing_month))[1],billing_year)
-    billing_date_from = datetime.strptime(billing_date_str_from, '%m/%d/%Y')
-    billing_date_tom = datetime.strptime(billing_date_str_tom, '%m/%d/%Y')
+    billing_date_str_from = '%d-%02d-01' % (billing_year,billing_month)
+    billing_date_str_tom = '%d-%02d-%02d' % (billing_year,billing_month,calendar.monthrange(int(billing_year),int(billing_month))[1])
+    billing_date_from = datetime.strptime(billing_date_str_from, '%Y-%m-%d')
+    billing_date_tom = datetime.strptime(billing_date_str_tom, '%Y-%m-%d')
 
     last_day_string = "%s-%s-%d%s" % (year, month, calendar.monthrange(int(year),int(month))[1],'T23:59:00Z')
     #print last_day_string
@@ -308,43 +308,6 @@ def main(host, port, year, month, tariff):
     brf_book.close()
     exit()
 
-    reading_report_file = "rrf-7729-%s-%s.csv" % (year, month)
-    rrf = open(reading_report_file, "wb")
-    rrf.write("Hyresid, ")
-    for day in range(1, int(last_day[-2:])+1):
-        rrf.write("%s-%s-%02d," % (year,month,day))
-    rrf.write("\n")
-    for id in id_list:
-        kWh_list = []
-        rrf.write("7729-%05d," % id)
-        for day in range(1, int(last_day[-2:])+1):
-            to_time = "%s-%s-%02d%s" % (year, month,day, 'T23:59:00Z')
-            s_query = "SELECT last(\"kWh\")-first(\"kWh\") FROM \"Energy\" WHERE (id = %d) AND time >= '%s-%s-%02d' AND time <= '%s'" % (id, year, month, day, to_time)
-            #print s_query
-            result = client.query(s_query, database=DBNAME)
-            kWh = result_to_kWh(result,'last_first')
-            kWh_list += [kWh]
-            rrf.write("%s," % kWh)
-        rrf.write("\n")
-
-    meter_report_file = "mrf-7729-%s-%s.csv" % (year, month)
-    mrf = open(meter_report_file, "wb")
-    mrf.write("Hyresid, ")
-    for day in range(1, int(last_day[-2:])+1):
-        mrf.write("%s-%s-%02d," % (year,month,day))
-    mrf.write("\n")
-    for id in id_list:
-        kWh_list = []
-        mrf.write("7729-%05d," % id)
-        for day in range(1, int(last_day[-2:])+1):
-            to_time = "%s-%s-%02d%s" % (year, month,day, 'T23:59:00Z')
-            s_query = "SELECT last(\"kWh\") FROM \"Energy\" WHERE (id = %d) AND time >= '%s-%s-%02d' AND time <= '%s'" % (id, year, month, day, to_time)
-            #print s_query
-            result = client.query(s_query, database=DBNAME)
-            kWh = result_to_kWh(result,'last')
-            kWh_list += [kWh]
-            mrf.write("%s," % kWh)
-        mrf.write("\n")
 
 def parse_args():
     """Parse the args."""
