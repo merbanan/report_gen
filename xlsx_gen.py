@@ -302,7 +302,7 @@ def main(host, port, year, month, tariff):
         brf_sheet.write(row_num+1, 0, '7729-%05d' % (int(id)), format_text)
         brf_sheet.write_datetime(row_num+1, 1, billing_date_from, format_date)
         brf_sheet.write_datetime(row_num+1, 2, billing_date_tom, format_date)
-        brf_sheet.write(row_num+1, 3, "EL")
+        brf_sheet.write(row_num+1, 3, "ELM")
         brf_sheet.write(row_num+1, 4, "%.2f" % (tariff*float(kWh)))
         brf_sheet.write(row_num+1, 5, "%s kWh el %s" % (kWh, months[int(month)]))
 
