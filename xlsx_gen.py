@@ -298,7 +298,9 @@ def main(host, port, year, month, tariff):
         #print(s_query)
         result = client.query(s_query, database=DBNAME)
         kWh = result_to_kWh(result,'last_first')
-
+        #print("kWh %s\n" % kWh)
+        if kWh is None:
+            kWh = 0;
         brf_sheet.write(row_num+1, 0, '7729-%05d' % (int(id)), format_text)
         brf_sheet.write_datetime(row_num+1, 1, billing_date_from, format_date)
         brf_sheet.write_datetime(row_num+1, 2, billing_date_tom, format_date)
