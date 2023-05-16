@@ -23,7 +23,7 @@ def main(host, port, start_date, end_date):
     # The API endpoint
     #url = "https://www.vattenfall.se/api/price/spot/pricearea/2023-01-01/2023-05-16/SN3"
     url = "https://www.vattenfall.se/api/price/spot/pricearea/%s/%s/SN3" % (start_date, end_date)
-    print(url)
+    #print(url)
 
     # A GET request to the API
     response = requests.get(url)
@@ -36,7 +36,7 @@ def main(host, port, start_date, end_date):
     for jl in response_json:
         row = []
         #data = json.loads(json_list)
-        print("%s: %s" % (jl['TimeStamp'], jl['Value']))
+        #print("%s: %s" % (jl['TimeStamp'], jl['Value']))
         price = "%s" % (jl['Value'])
         ts = jl['TimeStamp']
         json_body = [{
@@ -70,6 +70,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    print("Today's date:", args.start_date)
     main(host=args.host, port=args.port, start_date=args.start_date,end_date=args.end_date)
 
