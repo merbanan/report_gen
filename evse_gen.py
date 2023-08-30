@@ -9,6 +9,8 @@ import subprocess
 import os
 import calendar
 from datetime import datetime
+from calendar import monthrange
+
 
 from influxdb import InfluxDBClient
 import locale
@@ -78,6 +80,8 @@ def main(host, port, year, month, tariff, sheetid, pageid):
             onList.append(on)
 
     now = datetime.today()
+    days_in_month = monthrange(int(year), int(month))[1]
+    print("days_in_month: %d" % days_in_month)
 
 
     billing_year = int(year)
@@ -113,15 +117,37 @@ def main(host, port, year, month, tariff, sheetid, pageid):
     result = client.query(s_query, database=DBNAME)
     # print("Result: {0}".format(result))
 
+    # per id loop
     i=0
     for idi in ppidList:
-        tagfilter = {}
-        tagfilter['id'] = idi
-        q_res = result.get_points(tags=tagfilter)
-        for item in q_res:
-            kWh = item['max_min']
-            brf.write("7729-%05d;%s;%s;ELM;%s;%s kWh tariff 22-06 %s p-plats %s\n" % (int(onList[i]),billing_date_str_from,billing_date_str_tom,lformat('%.2f', tariff*kWh), lformat('%.2f', kWh), months[int(month)], idi))
-        i=i+1
+        print("idi: %s" % idi)
+
+    # per day loop
+    for day_idx in range(1, days_in_month+1):
+        #print(day_idx)
+        for hour_idx in range(24):
+            #print("%d-%d" % (day_idx, hour_idx))
+            date_start = "%s-%s-%02d %02d:00:00" % (year, month, day_idx, hour_idx)
+            date_end = "%s-%s-%02d %02d:59:59" % (year, month, day_idx, hour_idx)
+            ts_s = time.mktime(time.strptime(date_start, '%Y-%m-%d %H:%M:%S'))
+            ts_e = time.mktime(time.strptime(date_end, '%Y-%m-%d %H:%M:%S'))
+
+            #ts_e = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            s_query = "SELECT max(\"energy\")-min(\"energy\") FROM \"evmeters\" WHERE time >= %d000ms and time <= %d000ms GROUP BY id" % (ts_s, ts_e)
+            print(s_query)
+            result = client.query(s_query, database=DBNAME)
+
+            for idi in ppidList:
+                tagfilter = {}
+                tagfilter['id'] = idi
+                q_res = result.get_points(tags=tagfilter)
+
+                for item in q_res:
+                    kWh = item['max_min']
+                    print("%d-%d [%s]: %f" % (day_idx, hour_idx, idi, kWh))
+                    #brf.write("7729-%05d;%s;%s;ELM;%s;%s kWh tariff 22-06 %s p-plats %s\n" % (int(onList[i]),billing_date_str_from,billing_date_str_tom,lformat('%.2f', tariff*kWh), lformat('%.2f', kWh), months[int(month)], idi))
+                i=i+1
     exit()
 
 

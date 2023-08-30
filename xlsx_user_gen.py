@@ -45,12 +45,12 @@ def main(host, port, year, lgh_nr):
     client = InfluxDBClient(host, port, USER, PASSWORD, DBNAME)
     client.switch_database(DBNAME)
 
-    query = 'SELECT last("kWh")-first("kWh") FROM "Energy" WHERE (id = 40) AND time >= 1570572000000ms and time <= 1570658399999ms'
+    #query = 'SELECT last("kWh")-first("kWh") FROM "Energy" WHERE (id = 40) AND time >= 1570572000000ms and time <= 1570658399999ms'
 
-    result = client.query(query, database=DBNAME)
+    #result = client.query(query, database=DBNAME)
     #print("Result: {0}".format(result))
 
-    billing_report_file_xslx = "%s-%s.xlsx" % (year, month)
+    billing_report_file_xslx = "%s-%s.xlsx" % (lgh_nr, year)
     brf_book = xlsxwriter.Workbook(billing_report_file_xslx, {'strings_to_numbers': True})
     brf_main = brf_book.add_worksheet('Översikt')
 
