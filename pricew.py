@@ -24,9 +24,11 @@ def main(host, port, start_date, end_date):
     #print(url)
 
     # A GET request to the API
-    response = requests.get(url)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0'}
+    response = requests.get(url, headers=headers)
 
     # Print the response
+    #print(response.text)
     response_json = response.json()
     #print(response_json)
 
